@@ -18,8 +18,8 @@ function Bank:OnHide()
 end
 
 function Bank:SortItems()
-	if SortBankBags then
-		SortBankBags()
+	if C_Container.SortBankBags then
+		C_Container.SortBankBags()
 
 		if self.SortReagents then
 			self:Delay(.3, 'SortReagents')
@@ -33,7 +33,7 @@ if REAGENTBANK_CONTAINER then
 	tinsert(Bank.Bags, REAGENTBANK_CONTAINER)
 
 	function Bank:SortReagents()
-		SortReagentBankBags()
+		C_Container.SortReagentBankBags()
 	end
 
 	function Bank:IsShowingBag(bag)

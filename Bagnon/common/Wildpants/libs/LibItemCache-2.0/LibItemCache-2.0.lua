@@ -175,8 +175,7 @@ function Lib:GetBagInfo(owner, bag)
 
 		item.name, item.icon, item.viewable = name, icon, view
 	elseif tonumber(bag) then
-		item.free = GetContainerNumFreeSlots(bag)
-
+		item.free = C_Container.GetContainerNumFreeSlots(bag)
 		if bag == REAGENTBANK_CONTAINER then
 			item.cost = GetReagentBankCost()
 			item.owned = IsReagentBankUnlocked()
@@ -184,10 +183,10 @@ function Lib:GetBagInfo(owner, bag)
 			item.count = HasKey and HasKey() and GetContainerNumSlots(bag)
 			item.free = item.count and item.free and (item.count + item.free - 32)
 		elseif bag > BACKPACK_CONTAINER then
-			item.slot = ContainerIDToInventoryID(bag)
+			item.slot = C_Container.ContainerIDToInventoryID(bag)
 			item.link = GetInventoryItemLink('player', item.slot)
 			item.icon = GetInventoryItemTexture('player', item.slot)
-			item.count = GetContainerNumSlots(bag)
+			item.count = C_Container.GetContainerNumSlots(bag)
 
 			if bag > Lib.NumBags then
 				item.owned = (bag - Lib.NumBags) <= GetNumBankSlots()
@@ -210,7 +209,7 @@ function Lib:GetBagInfo(owner, bag)
 		if bag == KEYRING then
 			item.family = 9
 		elseif bag <= BACKPACK_CONTAINER then
-			item.count = item.count or item.owned and GetContainerNumSlots(bag)
+			item.count = item.count or item.owned and C_Container.GetContainerNumSlots(bag)
 			item.family = bag ~= REAGENTBANK_CONTAINER and 0 or REAGENTBANK_CONTAINER
 		end
 	end
@@ -235,7 +234,21 @@ function Lib:GetItemInfo(owner, bag, slot)
 	elseif bag == 'vault' then
 		item.id, item.icon, item.locked, item.recent, item.filtered, item.quality = GetVoidItemInfo(1, slot)
 	else
-		item.icon, item.count, item.locked, item.quality, item.readable, item.lootable, item.link, item.filtered, item.worthless, item.id = GetContainerItemInfo(bag, slot)
+		--item.icon, item.count, item.locked, item.quality, item.readable, item.lootable, item.link, item.filtered, item.worthless, item.id
+
+		local bagSlotInfo = C_Container.GetContainerItemInfo(bag, slot)
+		if bagSlotInfo then
+			item.icon = bagSlotInfo.iconFileID
+			item.count = bagSlotInfo.stackCount
+			item.locked = bagSlotInfo.isLocked
+			item.quality = bagSlotInfo.quality
+			item.readable = bagSlotInfo.isReadable
+			item.lootable = bagSlotInfo.hasLoot
+			item.link = bagSlotInfo.hyperlink
+			item.filtered = bagSlotInfo.isFiltered
+			item.worthless = bagSlotInfo.hasNoValue
+			item.id = bagSlotInfo.itemID
+		end
 	end
 
 	return Lib:RestoreItemData(item)
@@ -258,7 +271,7 @@ function Lib:GetItemID(owner, bag, slot)
 	elseif bag == 'vault' then
 		return GetVoidItemInfo(1, slot)
 	else
-		return GetContainerItemID(bag, slot)
+		return C_Container.GetContainerItemID(bag, slot)
 	end
 end
 
@@ -274,7 +287,7 @@ function Lib:PickupItem(owner, bag, slot)
 		elseif bag == 'vault' then
 			ClickVoidStorageSlot(1, slot)
 		else
-			PickupContainerItem(bag, slot)
+			C_Container.PickupContainerItem(bag, slot)
 		end
 	end
 end

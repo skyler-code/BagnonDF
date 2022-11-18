@@ -235,7 +235,7 @@ function Bag:UpdateTooltip()
 	elseif self.link and self:GetInfo().cached then
 		GameTooltip:SetHyperlink(self.link)
 	elseif self.link then
-		GameTooltip:SetInventoryItem('player', ContainerIDToInventoryID(self:GetID()))
+		GameTooltip:SetInventoryItem('player', C_Container.ContainerIDToInventoryID(self:GetID()))
 	elseif self:IsBankBag() then
 		GameTooltip:SetText(BANK_BAG, 1, 1, 1)
 	else

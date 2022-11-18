@@ -142,21 +142,22 @@ end
 
 function Item:OnPreClick(button)
 	if not IsModifiedClick() and button == 'RightButton' then
-		if REAGENTBANK_CONTAINER and Addon:InBank() and IsReagentBankUnlocked() and GetContainerNumFreeSlots(REAGENTBANK_CONTAINER) > 0 then
+		if REAGENTBANK_CONTAINER and Addon:InBank() and IsReagentBankUnlocked() and C_Container.GetContainerNumFreeSlots(REAGENTBANK_CONTAINER) > 0 then
 			if not Addon:IsReagents(self:GetBag()) and Search:IsReagent(self.info.link) then
-				for _, bag in ipairs {BANK_CONTAINER, 5, 6, 7, 8, 9, 10, 11} do
-					for slot = 1, GetContainerNumSlots(bag) do
-						if GetContainerItemID(bag, slot) == self.info.id then
-							local free = self.info.stack - select(2, GetContainerItemInfo(bag, slot))
+				for _, bag in ipairs {BANK_CONTAINER, 6, 7, 8, 9, 10, 11, 12} do
+					for slot = 1, C_Container.GetContainerNumSlots(bag) do
+						if C_Container.GetContainerItemID(bag, slot) == self.info.id then
+							local bagSlotInfo = C_Container.GetContainerItemInfo(bag, slot)
+							local free = self.info.stack - bagSlotInfo.stackCount
 							if free > 0 then
-								SplitContainerItem(self:GetBag(), self:GetID(), min(self.info.count, free))
-								PickupContainerItem(bag, slot)
+								C_Container.SplitContainerItem(self:GetBag(), self:GetID(), min(self.info.count, free))
+								C_Container.PickupContainerItem(bag, slot)
 							end
 						end
 					end
 				end
 
-				UseContainerItem(self:GetBag(), self:GetID(), nil, true)
+				C_Container.UseContainerItem(self:GetBag(), self:GetID(), nil, true)
 			end
 		end
 	end
@@ -296,7 +297,7 @@ end
 
 function Item:UpdateCooldown()
 	if self.info.id and (not self.info.cached) then
-			local start, duration, enable = GetContainerItemCooldown(self:GetBag(), self:GetID())
+			local start, duration, enable = C_Container.GetContainerItemCooldown(self:GetBag(), self:GetID())
 			local fade = duration > 0 and 0.4 or 1
 
 			CooldownFrame_Set(self.Cooldown, start, duration, enable)
@@ -402,9 +403,9 @@ end
 
 function Item:IsQuestItem()
 	if self.info.id then
-		if not self.info.cached and GetContainerItemQuestInfo then
-			local isQuest, questID, isActive = GetContainerItemQuestInfo(self:GetBag(), self:GetID())
-			return isQuest, (questID and not isActive)
+		if not self.info.cached and C_Container.GetContainerItemQuestInfo then
+			local itemQuestInfo = C_Container.GetContainerItemQuestInfo(self:GetBag(), self:GetID())
+			return itemQuestInfo.isQuestItem, itemQuestInfo.isActive
 		else
 			return self.info.class == Enum.ItemClass.Questitem or Search:ForQuest(self.info.link)
 		end
@@ -434,7 +435,7 @@ function Item:IsNew()
 end
 
 function Item:IsPaid()
-	return IsBattlePayItem(self:GetBag(), self:GetID())
+	return C_Container.IsBattlePayItem(self:GetBag(), self:GetID())
 end
 
 function Item:IsSlot(bag, slot)
