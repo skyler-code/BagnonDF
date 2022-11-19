@@ -8,16 +8,9 @@ local Unfit = LibStub('Unfit-1.0')
 local Lib = LibStub:NewLibrary('LibItemSearch-1.2', 24)
 if Lib then
 	Lib.Filters = {}
-	Lib.Scanner = LibItemSearchTooltipScanner or CreateFrame('GameTooltip', 'LibItemSearchTooltipScanner', UIParent, 'GameTooltipTemplate')
-	Lib.Scanner:RegisterEvent('GET_ITEM_INFO_RECEIVED')
-	Lib.Scanner:SetScript('OnEvent', function()
-		Lib.Filters.tipPhrases.keywords[FOLLOWERLIST_LABEL_CHAMPIONS:lower()] = Lib:TooltipLine('item:147556', 2)
-		Lib.Filters.tipPhrases.keywords[GARRISON_FOLLOWERS:lower()] = Lib:TooltipLine('item:147556', 2)
-	end)
 else
 	return
 end
-
 
 --[[ User API ]]--
 
@@ -52,9 +45,11 @@ end
 --[[ Internal API ]]--
 
 function Lib:TooltipLine(link, line)
-	self.Scanner:SetOwner(UIParent, 'ANCHOR_NONE')
-	self.Scanner:SetHyperlink(link)
-	return _G[self.Scanner:GetName() .. 'TextLeft' .. line]:GetText()
+	local tooltipData = C_TooltipInfo.GetHyperlink(link)
+	for _, line in ipairs(tooltipData.lines) do
+		TooltipUtil.SurfaceArgs(line)
+	end
+	return tooltipData.lines[line].leftText
 end
 
 
@@ -274,11 +269,10 @@ Lib.Filters.tip = {
 
 	match = function(self, link, _, search)
 		if link:find('item:') then
-			Lib.Scanner:SetOwner(UIParent, 'ANCHOR_NONE')
-			Lib.Scanner:SetHyperlink(link)
-
-			for i = 1, Lib.Scanner:NumLines() do
-				if Search:Find(search, _G[Lib.Scanner:GetName() .. 'TextLeft' .. i]:GetText()) then
+			local tooltipData = C_TooltipInfo.GetHyperlink(link)
+			for k, line in ipairs(tooltipData.lines) do
+				TooltipUtil.SurfaceArgs(line)
+				if Search:Find(search, line.leftText) then
 					return true
 				end
 			end
@@ -308,12 +302,11 @@ Lib.Filters.tipPhrases = {
 			return cached
 		end
 
-		Lib.Scanner:SetOwner(UIParent, 'ANCHOR_NONE')
-		Lib.Scanner:SetHyperlink(link)
-
+		local tooltipData = C_TooltipInfo.GetHyperlink(link)
 		local matches = false
-		for i = 1, Lib.Scanner:NumLines() do
-			if search == _G[Lib.Scanner:GetName() .. 'TextLeft' .. i]:GetText() then
+		for k, line in ipairs(tooltipData.lines) do
+			TooltipUtil.SurfaceArgs(line)
+			if search == line.leftText then
 				matches = true
 				break
 			end
