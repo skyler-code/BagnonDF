@@ -208,6 +208,8 @@ function Lib:GetBagInfo(owner, bag)
 
 		if bag == KEYRING then
 			item.family = 9
+		elseif bag == Enum.BagIndex.ReagentBag then
+			item.family = Enum.BagIndex.ReagentBag
 		elseif bag <= BACKPACK_CONTAINER then
 			item.count = item.count or item.owned and C_Container.GetContainerNumSlots(bag)
 			item.family = bag ~= REAGENTBANK_CONTAINER and 0 or REAGENTBANK_CONTAINER
