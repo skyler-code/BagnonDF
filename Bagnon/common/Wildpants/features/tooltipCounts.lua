@@ -18,69 +18,38 @@ local TOTAL = SILVER:format(L.Total)
 function TipCounts:OnEnable()
 	if Addon.sets.tipCount then
 		if not self.Text then
-			self.Text, self.Counts = {}, {}
-
-			for _,frame in pairs {UIParent:GetChildren()} do
-				if not frame:IsForbidden() and frame:GetObjectType() == 'GameTooltip' then
-					self:Hook(frame)
-				end
-			end
+			self.Text, self.Counts, self.Hooked = {}, {}, {}
+			self:Hook()
 		end
 	end
 end
 
-function TipCounts:Hook(tip)
-	tip:HookScript('OnTooltipCleared', self.OnClear)
-	tip:HookScript('OnTooltipSetItem', self.OnItem)
-
-	hooksecurefunc(tip, 'SetQuestItem', self.OnQuest)
-	hooksecurefunc(tip, 'SetQuestLogItem', self.OnQuest)
-
-	if C_TradeSkillUI then
-		if C_TradeSkillUI.GetRecipeFixedReagentItemLink then
-			hooksecurefunc(tip, 'SetRecipeReagentItem', self.OnTradeSkill('GetRecipeFixedReagentItemLink'))
-		else
-			hooksecurefunc(tip, 'SetRecipeReagentItem', self.OnTradeSkill('GetRecipeReagentItemLink'))
-			hooksecurefunc(tip, 'SetRecipeResultItem', self.OnTradeSkill('GetRecipeItemLink'))
-		end
-	end
+function TipCounts:Hook()
+	TooltipDataProcessor.AddTooltipPostCall(Enum.TooltipDataType.Item, function(...) self:AddOwners(...) end)
 end
 
 
 --[[ Events ]]--
 
-function TipCounts.OnItem(tip)
-	local name, link = tip:GetItem()
-	if name ~= '' then
-		TipCounts:AddOwners(tip, link)
-	end
-end
-
-function TipCounts.OnQuest(tip, type, quest)
-	TipCounts:AddOwners(tip, GetQuestItemLink(type, quest))
-end
-
-function TipCounts.OnTradeSkill(api)
-	return function(tip, recipeID, ...)
-		TipCounts:AddOwners(tip, tonumber(recipeID) and C_TradeSkillUI[api](recipeID, ...))
-	end
-end
-
 function TipCounts.OnClear(tip)
 	tip.__tamedCounts = false
 end
 
-
 --[[ API ]]--
 
-function TipCounts:AddOwners(tip, link)
+function TipCounts:AddOwners(tip, data)
 	if not Addon.sets.tipCount or tip.__tamedCounts then
 		return
 	end
 
-	local itemID = tonumber(link and GetItemInfo(link) and link:match('item:(%d+)')) -- Blizzard doing craziness when doing GetItemInfo
+	local itemID = data.id
 	if not itemID or itemID == HEARTHSTONE_ITEM_ID then
 		return
+	end
+
+	if not self.Hooked[tip:GetName()] then
+		tip:HookScript('OnTooltipCleared', self.OnClear)
+		self.Hooked[tip:GetName()] = true
 	end
 
 	local players = 0
