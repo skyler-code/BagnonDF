@@ -9,7 +9,8 @@ local Search = LibStub('LibItemSearch-1.2')
 local Unfit = LibStub('Unfit-1.0')
 
 Item.SlotTypes = {
-	[-3] = 'reagent',
+	[Enum.BagIndex.Reagentbank] = 'reagent',
+	[Enum.BagIndex.ReagentBag] = 'reagent',
 	[0x00001] = 'quiver',
 	[0x00002] = 'quiver',
 	[0x00003] = 'soul',
@@ -24,8 +25,8 @@ Item.SlotTypes = {
 	[0x00080] = 'engineer',
 	[0x00200] = 'gem',
 	[0x00400] = 'mine',
- 	[0x08000] = 'tackle',
- 	[0x10000] = 'fridge'
+	[0x08000] = 'tackle',
+	[0x10000] = 'fridge'
 }
 
 
