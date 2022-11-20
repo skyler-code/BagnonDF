@@ -180,7 +180,7 @@ function Lib:GetBagInfo(owner, bag)
 			item.cost = GetReagentBankCost()
 			item.owned = IsReagentBankUnlocked()
 		elseif bag == KEYRING then
-			item.count = HasKey and HasKey() and GetContainerNumSlots(bag)
+			item.count = HasKey and HasKey() and C_Container.GetContainerNumSlots(bag)
 			item.free = item.count and item.free and (item.count + item.free - 32)
 		elseif bag > BACKPACK_CONTAINER then
 			item.slot = C_Container.ContainerIDToInventoryID(bag)
