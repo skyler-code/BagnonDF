@@ -236,21 +236,7 @@ function Lib:GetItemInfo(owner, bag, slot)
 	elseif bag == 'vault' then
 		item.id, item.icon, item.locked, item.recent, item.filtered, item.quality = GetVoidItemInfo(1, slot)
 	else
-		--item.icon, item.count, item.locked, item.quality, item.readable, item.lootable, item.link, item.filtered, item.worthless, item.id
-
-		local bagSlotInfo = C_Container.GetContainerItemInfo(bag, slot)
-		if bagSlotInfo then
-			item.icon = bagSlotInfo.iconFileID
-			item.count = bagSlotInfo.stackCount
-			item.locked = bagSlotInfo.isLocked
-			item.quality = bagSlotInfo.quality
-			item.readable = bagSlotInfo.isReadable
-			item.lootable = bagSlotInfo.hasLoot
-			item.link = bagSlotInfo.hyperlink
-			item.filtered = bagSlotInfo.isFiltered
-			item.worthless = bagSlotInfo.hasNoValue
-			item.id = bagSlotInfo.itemID
-		end
+		item.icon, item.count, item.locked, item.quality, item.readable, item.lootable, item.link, item.filtered, item.worthless, item.id = Lib:GetContainerItemInfo(bag, slot)
 	end
 
 	return Lib:RestoreItemData(item)
@@ -294,6 +280,12 @@ function Lib:PickupItem(owner, bag, slot)
 	end
 end
 
+function Lib:GetContainerItemInfo(bag, slot)
+	local containerInfo = C_Container.GetContainerItemInfo(bag, slot)
+	if not containerInfo then return nil end
+	
+	return containerInfo.iconFileID, containerInfo.stackCount, containerInfo.isLocked, containerInfo.quality, containerInfo.isReadable, containerInfo.hasLoot, containerInfo.hyperlink, containerInfo.isFiltered, containerInfo.hasNoValue, containerInfo.itemID, containerInfo.isBound
+end
 
 --[[ Advanced ]]--
 
