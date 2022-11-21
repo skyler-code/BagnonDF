@@ -319,7 +319,7 @@ function Lib:IsBagCached(realm, name, isguild, bag)
 		return not Lib.AtGuild
 	end
 
-	local isBankBag = Lib:IsBank(bag) or Lib:IsReagents(bag) or type(bag) == 'number' and Lib:IsBankBag(bag)
+	local isBankBag = Lib:IsBank(bag) or Lib:IsReagentsBank(bag) or type(bag) == 'number' and Lib:IsBankBag(bag)
 	return isBankBag and not Lib.AtBank or bag == 'vault' and not Lib.AtVault
 end
 
@@ -421,10 +421,13 @@ function Lib:IsBankBag(bag)
   return bag > Lib.NumBags and bag <= (Lib.NumBags + NUM_BANKBAGSLOTS)
 end
 
-function Lib:IsReagents(bag)
+function Lib:IsReagentsBank(bag)
 	return bag == REAGENTBANK_CONTAINER
 end
 
+function Lib:IsReagentsBag(bag)
+	return bag == Enum.BagIndex.ReagentBag
+end
 
 --[[ Embedding ]]--
 

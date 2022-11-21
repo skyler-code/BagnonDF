@@ -80,7 +80,7 @@ end
 
 function Bag:OnClick(button)
 	if button == 'RightButton' and ContainerFrame1FilterDropDown then
-		if not self:IsReagents() and self:GetInfo().owned then
+		if not self:IsReagentsBank() and self:GetInfo().owned then
 			ContainerFrame1FilterDropDown:SetParent(self)
 			PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
 			ToggleDropDownMenu(1, nil, ContainerFrame1FilterDropDown, self, 0, 0)
@@ -129,13 +129,13 @@ function Bag:RegisterEvents()
 	self:RegisterEvent('BAG_CLOSED', 'BAG_UPDATE')
 	self:RegisterEvent('BAG_UPDATE')
 
-	if self:IsBank() or self:IsBankBag() or self:IsReagents() then
+	if self:IsBank() or self:IsBankBag() or self:IsReagentsBank() then
 		self:RegisterMessage('CACHE_BANK_OPENED', 'RegisterEvents')
 		self:RegisterMessage('CACHE_BANK_CLOSED', 'RegisterEvents')
 	end
 
 	if not self:GetInfo().cached then
-		if self:IsReagents() then
+		if self:IsReagentsBank() then
 			self:RegisterEvent('REAGENTBANK_PURCHASED', 'Update')
 		elseif self:IsCustomSlot() then
 			if self:IsBankBag() then
@@ -170,7 +170,7 @@ function Bag:Update()
 
   if self:IsBackpack() or self:IsBank() then
 		self:SetIcon('Interface/Buttons/Button-Backpack-Up')
-	elseif self:IsReagents() then
+	elseif self:IsReagentsBank() then
 		self:SetIcon('Interface/Icons/Achievement_GuildPerk_BountifulBags')
 	elseif self:IsKeyring() then
 		self:SetIcon('Interface/ContainerFrame/KeyRing-Bag-Icon')
@@ -220,7 +220,7 @@ function Bag:UpdateTooltip()
 
 	-- title/item
 	if self:IsPurchasable() then
-		GameTooltip:SetText(self:IsReagents() and REAGENT_BANK or BANK_BAG_PURCHASE, 1, 1, 1)
+		GameTooltip:SetText(self:IsReagentsBank() and REAGENT_BANK or BANK_BAG_PURCHASE, 1, 1, 1)
 		GameTooltip:AddLine(L.TipPurchaseBag:format(L.Click))
 
 		SetTooltipMoney(GameTooltip, self:GetInfo().cost)
@@ -228,7 +228,7 @@ function Bag:UpdateTooltip()
 		GameTooltip:SetText(BACKPACK_TOOLTIP, 1,1,1)
 	elseif self:IsBank() then
 		GameTooltip:SetText(BANK, 1,1,1)
-	elseif self:IsReagents() then
+	elseif self:IsReagentsBank() then
 		GameTooltip:SetText(REAGENT_BANK, 1,1,1)
 	elseif self:IsKeyring() then
 		GameTooltip:SetText(KEYRING, 1,1,1)
@@ -256,7 +256,7 @@ end
 function Bag:Purchase()
 	PlaySound(SOUNDKIT.IG_MAINMENU_OPEN)
 
-	if self:IsReagents() then
+	if self:IsReagentsBank() then
 		LibStub('Sushi-3.1').Popup('CONFIRM_BUY_REAGENTBANK_TAB')
 	else
 		LibStub('Sushi-3.1').Popup {
@@ -307,8 +307,8 @@ function Bag:IsBank()
 	return Addon:IsBank(self:GetID())
 end
 
-function Bag:IsReagents()
-	return Addon:IsReagents(self:GetID())
+function Bag:IsReagentsBank()
+	return Addon:IsReagentsBank(self:GetID())
 end
 
 function Bag:IsKeyring()

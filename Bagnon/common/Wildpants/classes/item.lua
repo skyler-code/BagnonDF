@@ -144,7 +144,7 @@ end
 function Item:OnPreClick(button)
 	if not IsModifiedClick() and button == 'RightButton' then
 		if REAGENTBANK_CONTAINER and Addon:InBank() and IsReagentBankUnlocked() and C_Container.GetContainerNumFreeSlots(REAGENTBANK_CONTAINER) > 0 then
-			if not Addon:IsReagents(self:GetBag()) and Search:IsReagent({ bagId = self:GetBag(), slotId = self:GetID() }) then
+			if not Addon:IsReagentsBank(self:GetBag()) and Search:IsReagent({ bagId = self:GetBag(), slotId = self:GetID() }) then
 				for _, bag in ipairs {BANK_CONTAINER, 6, 7, 8, 9, 10, 11, 12} do
 					for slot = 1, C_Container.GetContainerNumSlots(bag) do
 						if C_Container.GetContainerItemID(bag, slot) == self.info.id then
@@ -464,7 +464,7 @@ function Item:GetInventorySlot()
 	local bag = self:GetBag()
 	local api = Addon:IsBank(bag) and BankButtonIDToInvSlotID or
 							Addon:IsKeyring(bag) and KeyRingButtonIDToInvSlotID or
-							Addon:IsReagents(bag) and ReagentBankButtonIDToInvSlotID
+							Addon:IsReagentsBank(bag) and ReagentBankButtonIDToInvSlotID
 	return api and api(self:GetID())
 end
 
