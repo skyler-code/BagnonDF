@@ -144,7 +144,7 @@ end
 function Item:OnPreClick(button)
 	if not IsModifiedClick() and button == 'RightButton' then
 		if REAGENTBANK_CONTAINER and Addon:InBank() and IsReagentBankUnlocked() and C_Container.GetContainerNumFreeSlots(REAGENTBANK_CONTAINER) > 0 then
-			if not Addon:IsReagents(self:GetBag()) and Search:IsReagent(self.info.link) then
+			if not Addon:IsReagents(self:GetBag()) and Search:IsReagent({ bagId = self:GetBag(), slotId = self:GetID() }) then
 				for _, bag in ipairs {BANK_CONTAINER, 6, 7, 8, 9, 10, 11, 12} do
 					for slot = 1, C_Container.GetContainerNumSlots(bag) do
 						if C_Container.GetContainerItemID(bag, slot) == self.info.id then
@@ -238,8 +238,8 @@ function Item:UpdateBorder()
 			r,g,b = 1, .82, .2
 		elseif Addon.sets.glowUnusable and Unfit:IsItemUnusable(id) then
 			r,g,b = RED_FONT_COLOR.r, RED_FONT_COLOR.g, RED_FONT_COLOR.b
-		elseif Addon.sets.glowSets and Search:InSet(link) then
-	  	r,g,b = .2, 1, .8
+		elseif Addon.sets.glowSets and Search:InSet({ bagId = self:GetBag(), slotId = self:GetID() }) then
+			r,g,b = .2, 1, .8
 		elseif Addon.sets.glowQuality and quality and quality > 1 then
 			r,g,b = GetItemQualityColor(quality)
 		end
@@ -314,7 +314,7 @@ end
 
 function Item:UpdateSearch()
 	local search = Addon.canSearch and Addon.search or ''
-	local matches = search == '' or Search:Matches(self.info.link, search)
+	local matches = search == '' or Search:Matches({ bagId = self:GetBag(), slotId = self:GetID() }, search)
 
 	self:SetAlpha(matches and 1 or 0.3)
 	self:SetLocked(not matches or self.info.locked)
@@ -408,7 +408,7 @@ function Item:IsQuestItem()
 			local itemQuestInfo = C_Container.GetContainerItemQuestInfo(self:GetBag(), self:GetID())
 			return itemQuestInfo.isQuestItem, itemQuestInfo.isActive
 		else
-			return self.info.class == Enum.ItemClass.Questitem or Search:ForQuest(self.info.link)
+			return self.info.class == Enum.ItemClass.Questitem or Search:ForQuest({ bagId = self:GetBag(), slotId = self:GetID() })
 		end
 	end
 end

@@ -115,8 +115,8 @@ function Sort:GetSpaces()
       local item = Addon:GetItemInfo(self.owner, bag, slot)
       tinsert(spaces, {index = #spaces, bag = bag, slot = slot, family = container.family, item = item})
 
-      item.class = item.link and Search:ForQuest(item.link) and Enum.ItemClass.Questitem or item.class
-      item.set = item.link and Search:InSet(item.link) and 0 or 1
+      item.class = item.link and Search:ForQuest({ bagId = bag, slotId = slot }) and Enum.ItemClass.Questitem or item.class
+      item.set = item.link and Search:InSet({ bagId = bag, slotId = slot }) and 0 or 1
       item.space = spaces[#spaces]
     end
   end

@@ -14,38 +14,38 @@ end
 
 --[[ User API ]]--
 
-function Lib:Matches(link, search)
-	return Search(link, search, self.Filters)
+function Lib:Matches(slotInfo, search)
+	return Search(slotInfo, search, self.Filters)
 end
 
-function Lib:Tooltip(link, search)
-	return link and self.Filters.tip:match(link, nil, search)
+function Lib:Tooltip(slotInfo, search)
+	return bagId and self.Filters.tip:match(slotInfo, nil, search)
 end
 
-function Lib:TooltipPhrase(link, search)
-	return link and self.Filters.tipPhrases:match(link, nil, search)
+function Lib:TooltipPhrase(slotInfo, search)
+	return bagId and self.Filters.tipPhrases:match(slotInfo, nil, search)
 end
 
-function Lib:ForQuest(link)
-	return self:Tooltip(link, GetItemClassInfo(Enum.ItemClass.Questitem):lower())
+function Lib:ForQuest(slotInfo)
+	return self:Tooltip(slotInfo, GetItemClassInfo(Enum.ItemClass.Questitem):lower())
 end
 
-function Lib:IsReagent(link)
-	return self:TooltipPhrase(link, PROFESSIONS_USED_IN_COOKING)
+function Lib:IsReagent(slotInfo)
+	return self:TooltipPhrase(slotInfo, PROFESSIONS_USED_IN_COOKING)
 end
 
-function Lib:InSet(link, search)
-	if IsEquippableItem(link) then
-		local id = tonumber(link:match('item:(%-?%d+)'))
-		return self:BelongsToSet(id, (search or ''):lower())
+function Lib:InSet(slotInfo, search)
+	local itemInfo = C_Container.GetContainerItemInfo(slotInfo.bagId, slotInfo.slotId)
+	if itemInfo and IsEquippableItem(itemInfo.hyperlink) then
+		return self:BelongsToSet(itemInfo.itemID, (search or ''):lower())
 	end
 end
 
 
 --[[ Internal API ]]--
 
-function Lib:TooltipLine(link, line)
-	local tooltipData = C_TooltipInfo.GetHyperlink(link)
+function Lib:TooltipLine(slotInfo, line)
+	local tooltipData = C_TooltipInfo.GetBagItem(slotInfo.bagId, slotInfo.slotId)
 	for _, line in ipairs(tooltipData.lines) do
 		TooltipUtil.SurfaceArgs(line)
 	end
@@ -111,8 +111,9 @@ Lib.Filters.name = {
 		return not operator and search
 	end,
 
-	match = function(self, item, _, search)
-		return Search:Find(search, C_Item.GetItemNameByID(item) or item:match('%[(.+)%]'))
+	match = function(self, slotInfo, _, search)
+		local itemID = C_Container.GetContainerItemID(slotInfo.bagId, slotInfo.slotId)
+		return itemID and Search:Find(search, C_Item.GetItemNameByID(itemID))
 	end
 }
 
@@ -123,8 +124,9 @@ Lib.Filters.type = {
 		return not operator and search
 	end,
 
-	match = function(self, item, _, search)
-		local type, subType, _, equipSlot = select(6, GetItemInfo(item))
+	match = function(self, slotInfo, _, search)
+		local itemID = C_Container.GetContainerItemID(slotInfo.bagId, slotInfo.slotId)
+		local type, subType, _, equipSlot = itemID and select(6, GetItemInfo(itemID))
 		return Search:Find(search, type, subType, _G[equipSlot])
 	end
 }
@@ -136,8 +138,9 @@ Lib.Filters.level = {
 		return tonumber(search)
 	end,
 
-	match = function(self, link, operator, num)
-		local lvl = select(4, GetItemInfo(link))
+	match = function(self, slotInfo, operator, num)
+		local itemID = C_Container.GetContainerItemID(slotInfo.bagId, slotInfo.slotId)
+		local lvl = select(4, GetItemInfo(itemID))
 		if lvl then
 			return Search:Compare(operator, lvl, num)
 		end
@@ -151,8 +154,9 @@ Lib.Filters.requiredlevel = {
 		return tonumber(search)
 	end,
 
-	match = function(self, link, operator, num)
-		local lvl = select(5, GetItemInfo(link))
+	match = function(self, slotInfo, operator, num)
+		local itemID = C_Container.GetContainerItemID(slotInfo.bagId, slotInfo.slotId)
+		local lvl = select(5, GetItemInfo(itemID))
 		if lvl then
 			return Search:Compare(operator, lvl, num)
 		end
@@ -166,8 +170,8 @@ Lib.Filters.sets = {
 		return not operator and search
 	end,
 
-	match = function(self, link, _, search)
-		return Lib:InSet(link, search)
+	match = function(self, slotInfo, _, search)
+		return Lib:InSet(slotInfo, search)
 	end,
 }
 
@@ -177,15 +181,18 @@ Lib.Filters.quality = {
 
 	canSearch = function(self, _, search)
 		for quality, name in pairs(self.keywords) do
-		  if name:find(search) then
+			if name:find(search) then
 				return quality
-		  end
+			end
 		end
 	end,
 
-	match = function(self, link, operator, num)
-		local quality = link:find('battlepet') and tonumber(link:match('%d+:%d+:(%d+)')) or C_Item.GetItemQualityByID(link)
-		return Search:Compare(operator, quality, num)
+	match = function(self, slotInfo, operator, num)
+		local itemInfo = C_Container.GetContainerItemInfo(slotInfo.bagId, slotInfo.slotId)
+		if itemInfo then
+			local quality = itemInfo.hyperlink:find('battlepet') and tonumber(itemInfo.hyperlink:match('%d+:%d+:(%d+)')) or itemInfo.quality
+			return Search:Compare(operator, quality, num)
+		end
 	end,
 }
 
@@ -203,7 +210,7 @@ Lib.Filters.items = {
 		return not operator and self.keyword:find(search)
 	end,
 
-	match = function(self, link)
+	match = function(self, slotInfo)
 		return true
 	end
 }
@@ -215,9 +222,10 @@ Lib.Filters.usable = {
 		return not operator and self.keyword:find(search)
 	end,
 
-	match = function(self, link)
-		if not Unfit:IsItemUnusable(link) then
-			local lvl = select(5, GetItemInfo(link))
+	match = function(self, slotInfo)
+		local itemInfo = C_Container.GetContainerItemInfo(slotInfo.bagId, slotInfo.slotId)
+		if itemInfo and not Unfit:IsItemUnusable(itemInfo.hyperlink) then
+			local lvl = select(5, GetItemInfo(itemInfo.itemID))
 			return lvl and (lvl == 0 or lvl > UnitLevel('player'))
 		end
 	end
@@ -235,9 +243,9 @@ if C_ArtifactUI then
 			return not operator and self.keyword1:find(search) or self.keyword2:find(search)
 		end,
 
-		match = function(self, link)
-			local id = link:match('item:(%d+)')
-			return id and C_ArtifactUI.GetRelicInfoByItemID(id)
+		match = function(self, slotInfo)
+			local itemID = C_Container.GetContainerItemID(slotInfo.bagId, slotInfo.slotId)
+			return itemID and C_ArtifactUI.GetRelicInfoByItemID(itemID)
 		end
 	}
 end
@@ -250,8 +258,9 @@ if C_AzeriteItem and C_CurrencyInfo and C_CurrencyInfo.GetAzeriteCurrencyID then
 			return not operator and self.keyword:find(search)
 		end,
 
-		match = function(self, link)
-			return C_AzeriteItem.IsAzeriteItemByID(link) or C_AzeriteEmpoweredItem.IsAzeriteEmpoweredItemByID(link)
+		match = function(self, slotInfo)
+			local itemID = C_Container.GetContainerItemID(slotInfo.bagId, slotInfo.slotId)
+			return C_AzeriteItem.IsAzeriteItemByID(itemID) or C_AzeriteEmpoweredItem.IsAzeriteEmpoweredItemByID(itemID)
 		end
 	}
 end
@@ -267,9 +276,10 @@ Lib.Filters.tip = {
 		return search
 	end,
 
-	match = function(self, link, _, search)
-		if link:find('item:') then
-			local tooltipData = C_TooltipInfo.GetHyperlink(link)
+	match = function(self, slotInfo, _, search)
+		local itemInfo = C_Container.GetContainerItemInfo(slotInfo.bagId, slotInfo.slotId)
+		if itemInfo and itemInfo.hyperlink:find('item:') then
+			local tooltipData = C_TooltipInfo.GetBagItem(slotInfo.bagId, slotInfo.slotId)
 			for k, line in ipairs(tooltipData.lines) do
 				TooltipUtil.SurfaceArgs(line)
 				if Search:Find(search, line.leftText) then
@@ -291,8 +301,8 @@ Lib.Filters.tipPhrases = {
 		end
 	end,
 
-	match = function(self, link, _, search)
-		local id = link:match('item:(%d+)')
+	match = function(self, slotInfo, _, search)
+		local id = C_Container.GetContainerItemID(slotInfo.bagId, slotInfo.slotId)
 		if not id then
 			return
 		end
@@ -302,7 +312,7 @@ Lib.Filters.tipPhrases = {
 			return cached
 		end
 
-		local tooltipData = C_TooltipInfo.GetHyperlink(link)
+		local tooltipData = C_TooltipInfo.GetBagItem(id)
 		local matches = false
 		for k, line in ipairs(tooltipData.lines) do
 			TooltipUtil.SurfaceArgs(line)
