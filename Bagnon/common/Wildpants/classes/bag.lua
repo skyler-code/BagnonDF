@@ -187,7 +187,7 @@ function Bag:Update()
 		local id = self:GetID()
 		for i, atlas in ipairs(self.FILTER_ICONS) do
 			local active = C_Container and (id > 0 and C_Container.GetBagSlotFlag(id, 2^i)) or
-										 GetBagSlotFlag and (self:IsBankBag() and GetBankBagSlotFlag(id - NUM_BAG_SLOTS, i) or GetBagSlotFlag(id, i))
+										GetBagSlotFlag and (self:IsBankBag() and GetBankBagSlotFlag(id - NUM_TOTAL_EQUIPPED_BAG_SLOTS, i) or GetBagSlotFlag(id, i))
 			if active then
 				return self.FilterIcon.Icon:SetAtlas(atlas)
 			end

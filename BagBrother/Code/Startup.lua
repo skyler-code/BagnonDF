@@ -70,7 +70,7 @@ function Brother:SetupEvents()
 end
 
 function Brother:UpdateData()
-	for i = BACKPACK_CONTAINER, NUM_BAG_SLOTS do
+	for i = BACKPACK_CONTAINER, NUM_TOTAL_EQUIPPED_BAG_SLOTS do
 		self:BAG_UPDATE(i)
 	end
 

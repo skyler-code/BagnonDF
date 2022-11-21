@@ -406,7 +406,7 @@ function Lib:IsBackpack(bag)
 end
 
 function Lib:IsBackpackBag(bag)
-  return bag > BACKPACK_CONTAINER and bag <= NUM_BAG_SLOTS
+  return bag > BACKPACK_CONTAINER and bag <= NUM_TOTAL_EQUIPPED_BAG_SLOTS
 end
 
 function Lib:IsKeyring(bag)

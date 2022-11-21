@@ -69,7 +69,7 @@ function TipCounts:AddOwners(tip, data)
 				local bags, bank = 0,0
 
 				if info.cached then
-					for i = BACKPACK_CONTAINER, NUM_BAG_SLOTS do
+					for i = BACKPACK_CONTAINER, NUM_TOTAL_EQUIPPED_BAG_SLOTS do
 						bags = bags + self:GetCount(owner, i, itemID)
 					end
 

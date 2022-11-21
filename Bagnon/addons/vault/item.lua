@@ -32,7 +32,7 @@ function Item:OnClick(button)
 		local type, _, link = GetCursorInfo()
 
 		if not isRight and type == 'item' and link then
-			for bag = BACKPACK_CONTAINER, NUM_BAG_SLOTS do
+			for bag = BACKPACK_CONTAINER, NUM_TOTAL_EQUIPPED_BAG_SLOTS do
 				for slot = 1, C_Container.GetContainerNumSlots(bag) do
 					if C_Container.GetContainerItemLink(bag, slot) == link then
 						C_Container.UseContainerItem(bag, slot)
