@@ -469,5 +469,5 @@ function Item:GetInventorySlot()
 end
 
 function Item:GetEmptyItemIcon()
-	return Addon.sets.emptySlots and 'Interface/PaperDoll/UI-Backpack-EmptySlot'
+	return Addon.sets.emptySlots and 'Interface/PaperDoll/UI-Backpack-EmptySlot' or ""
 end
