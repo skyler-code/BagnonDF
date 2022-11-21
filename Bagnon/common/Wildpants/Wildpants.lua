@@ -114,7 +114,9 @@ function Addon:OnEnable()
 		glowAlpha = 0.5,
 		glowQuality = true, glowNew = true, glowQuest = true, glowSets = true, glowUnusable = true,
 
-		emptySlots = true, colorSlots = true,
+		emptySlots = true,
+		modernEmptySlots = true,
+		colorSlots = true,
 		normalColor = {1, 1, 1},
 		keyColor = {1, .9, .19},
 		quiverColor = {1, .87, .68},

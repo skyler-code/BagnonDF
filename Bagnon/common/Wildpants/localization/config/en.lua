@@ -91,6 +91,7 @@ L.GlowPoor = 'Mark Poor Items'
 L.GlowAlpha = 'Glow Brightness'
 
 L.EmptySlots = 'Display Background'
+L.ModernEmptySlots = 'Use Modern Background Icon'
 L.ColorSlots = 'Color by Bag Type'
 L.NormalColor = 'Normal Color'
 L.KeyColor = 'Key Color'

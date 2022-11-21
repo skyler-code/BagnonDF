@@ -25,6 +25,9 @@ function Color:Populate()
 	-- Slots
 	self:Add('Header', TRADESKILL_FILTER_SLOTS, 'GameFontHighlight', true).top = 15
 	self:AddCheck('emptySlots')
+	if Addon.sets.emptySlots then
+		self:AddCheck('modernEmptySlots')
+	end
 	self:AddCheck('colorSlots').bottom = 11
 
   if Addon.sets.colorSlots then
