@@ -16,15 +16,15 @@ This file is part of BagBrother.
 --]]
 
 local NUM_VAULT_SLOTS = 80 * 2
-local FIRST_BANK_SLOT = 1 + NUM_BAG_SLOTS
-local LAST_BANK_SLOT = NUM_BANKBAGSLOTS + NUM_BAG_SLOTS
+local FIRST_BANK_SLOT = 1 + NUM_TOTAL_EQUIPPED_BAG_SLOTS
+local LAST_BANK_SLOT = NUM_BANKBAGSLOTS + NUM_TOTAL_EQUIPPED_BAG_SLOTS
 
 
 --[[ Continuous Events ]]--
 
 function BagBrother:BAG_UPDATE(bag)
-	if bag <= NUM_BAG_SLOTS then
-  	self:SaveBag(bag, bag <= BACKPACK_CONTAINER, bag == BACKPACK_CONTAINER or bag == KEYRING_CONTAINER and HasKey and HasKey())
+	if bag <= NUM_TOTAL_EQUIPPED_BAG_SLOTS then
+		self:SaveBag(bag, bag <= BACKPACK_CONTAINER, bag == BACKPACK_CONTAINER or bag == KEYRING_CONTAINER and HasKey and HasKey())
 	end
 end
 
@@ -84,9 +84,9 @@ function BagBrother:VOID_STORAGE_CLOSE()
 
 		for i = 1, NUM_VAULT_SLOTS do
 			local id = GetVoidItemInfo(1, i)
-    		self.Player.vault[i] = id and tostring(id) or nil
-  		end
-  	end
+			self.Player.vault[i] = id and tostring(id) or nil
+		end
+	end
 end
 
 
