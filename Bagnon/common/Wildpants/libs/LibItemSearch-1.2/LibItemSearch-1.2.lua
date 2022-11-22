@@ -340,6 +340,6 @@ Lib.Filters.tipPhrases = {
 		['bop'] = ITEM_BIND_ON_PICKUP,
 		['boe'] = ITEM_BIND_ON_EQUIP,
 		['bou'] = ITEM_BIND_ON_USE,
-		['boa'] = ITEM_BIND_TO_BNETACCOUNT,
+		['boa'] = ITEM_BNETACCOUNTBOUND,
 	}
 }
