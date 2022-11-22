@@ -175,15 +175,14 @@ Lib.Filters.itemId = {
 }
 
 Lib.Filters.anima = {
-	tags = {'anima'},
+	keyword = 'anima',
 
 	canSearch = function(self, _, search)
-		return search
+		return not operator and self.keyword:find(search)
 	end,
 
 	match = function(self, slotInfo, _, search)
 		local id = C_Container.GetContainerItemID(slotInfo.bagId, slotInfo.slotId)
-		print(id)
 		return id and C_Item.IsAnimaItemByID(id)
 	end
 }
