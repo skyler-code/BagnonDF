@@ -35,9 +35,9 @@ function Lib:IsReagent(slotInfo)
 end
 
 function Lib:InSet(slotInfo, search)
-	local itemInfo = C_Container.GetContainerItemInfo(slotInfo.bagId, slotInfo.slotId)
-	if itemInfo and IsEquippableItem(itemInfo.hyperlink) then
-		return self:BelongsToSet(itemInfo.itemID, (search or ''):lower())
+	local itemID = C_Container.GetContainerItemID(slotInfo.bagId, slotInfo.slotId)
+	if itemID and IsEquippableItem(itemID) then
+		return self:BelongsToSet(itemID, (search or ''):lower())
 	end
 end
 
