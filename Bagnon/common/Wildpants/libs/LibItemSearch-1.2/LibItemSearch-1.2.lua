@@ -239,7 +239,6 @@ for i = 0, #ITEM_QUALITY_COLORS do
 	Lib.Filters.quality.keywords[i] = _G['ITEM_QUALITY' .. i .. '_DESC']:lower()
 end
 
-
 --[[ Classic Keywords ]]--
 
 Lib.Filters.items = {
@@ -269,7 +268,6 @@ Lib.Filters.usable = {
 		end
 	end
 }
-
 
 --[[ Tooltips ]]--
 
@@ -346,7 +344,6 @@ Lib.Filters.tipPhrases = {
 		return checkTipCache(search, slotInfo)
 	end,
 
-	cache = setmetatable({}, {__index = function(t, k) local v = {} t[k] = v return v end}),
 	keywords = {
 		[ITEM_BIND_ON_PICKUP:lower()] = ITEM_BIND_ON_PICKUP,
 		[ITEM_SOULBOUND:lower()] = ITEM_SOULBOUND,
