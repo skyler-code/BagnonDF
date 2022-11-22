@@ -232,25 +232,6 @@ Lib.Filters.usable = {
 }
 
 
---[[ Retail Keywords ]]--
-
-if C_ArtifactUI then
-	Lib.Filters.artifact = {
-		keyword1 = ITEM_QUALITY6_DESC:lower(),
-		keyword2 = RELICSLOT:lower(),
-
-		canSearch = function(self, operator, search)
-			return not operator and self.keyword1:find(search) or self.keyword2:find(search)
-		end,
-
-		match = function(self, slotInfo)
-			local itemID = C_Container.GetContainerItemID(slotInfo.bagId, slotInfo.slotId)
-			return itemID and C_ArtifactUI.GetRelicInfoByItemID(itemID)
-		end
-	}
-end
-
-
 --[[ Tooltips ]]--
 
 local cacheAge
