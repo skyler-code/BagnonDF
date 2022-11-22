@@ -185,6 +185,23 @@ Lib.Filters.anima = {
 	end
 }
 
+Lib.Filters.keystone = {
+	keywords = {"key", "keystone"},
+
+	canSearch = function(self, _, search)
+		for _, name in ipairs(self.keywords) do
+			if name:find(search) then
+				return true
+			end
+		end
+	end,
+
+	match = function(self, slotInfo, _, search)
+		local id = C_Container.GetContainerItemID(slotInfo.bagId, slotInfo.slotId)
+		return id and C_Item.IsItemKeystoneByID(id)
+	end
+}
+
 Lib.Filters.sets = {
 	tags = {'s', 'set'},
 
