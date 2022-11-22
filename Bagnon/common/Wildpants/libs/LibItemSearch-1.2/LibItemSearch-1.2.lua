@@ -105,7 +105,7 @@ end
 --[[ General Filters ]]--
 
 Lib.Filters.name = {
-  tags = {'n', 'name'},
+	tags = {'n', 'name'},
 
 	canSearch = function(self, operator, search)
 		return not operator and search
