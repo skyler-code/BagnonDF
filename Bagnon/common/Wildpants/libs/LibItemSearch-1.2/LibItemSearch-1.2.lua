@@ -139,11 +139,9 @@ Lib.Filters.level = {
 	end,
 
 	match = function(self, slotInfo, operator, num)
-		local itemID = C_Container.GetContainerItemID(slotInfo.bagId, slotInfo.slotId)
-		local lvl = itemID and select(4, GetItemInfo(itemID))
-		if lvl then
-			return Search:Compare(operator, lvl, num)
-		end
+		local itemLoc = ItemLocation:CreateFromBagAndSlot(slotInfo.bagId, slotInfo.slotId)
+		local lvl = itemLoc:IsValid() and C_Item.GetCurrentItemLevel(itemLoc)
+		return lvl and Search:Compare(operator, lvl, num)
 	end
 }
 
