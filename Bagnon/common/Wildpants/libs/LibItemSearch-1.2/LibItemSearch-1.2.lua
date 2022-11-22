@@ -140,7 +140,7 @@ Lib.Filters.level = {
 
 	match = function(self, slotInfo, operator, num)
 		local itemID = C_Container.GetContainerItemID(slotInfo.bagId, slotInfo.slotId)
-		local lvl = select(4, GetItemInfo(itemID))
+		local lvl = itemID and select(4, GetItemInfo(itemID))
 		if lvl then
 			return Search:Compare(operator, lvl, num)
 		end
@@ -156,7 +156,7 @@ Lib.Filters.requiredlevel = {
 
 	match = function(self, slotInfo, operator, num)
 		local itemID = C_Container.GetContainerItemID(slotInfo.bagId, slotInfo.slotId)
-		local lvl = select(5, GetItemInfo(itemID))
+		local lvl = itemId and select(5, GetItemInfo(itemID))
 		if lvl then
 			return Search:Compare(operator, lvl, num)
 		end
@@ -250,23 +250,53 @@ if C_ArtifactUI then
 	}
 end
 
-if C_AzeriteItem and C_CurrencyInfo and C_CurrencyInfo.GetAzeriteCurrencyID then
-	Lib.Filters.azerite = {
-		keyword = C_CurrencyInfo.GetBasicCurrencyInfo(C_CurrencyInfo.GetAzeriteCurrencyID()).name:lower(),
-
-		canSearch = function(self, operator, search)
-			return not operator and self.keyword:find(search)
-		end,
-
-		match = function(self, slotInfo)
-			local itemID = C_Container.GetContainerItemID(slotInfo.bagId, slotInfo.slotId)
-			return C_AzeriteItem.IsAzeriteItemByID(itemID) or C_AzeriteEmpoweredItem.IsAzeriteEmpoweredItemByID(itemID)
-		end
-	}
-end
-
 
 --[[ Tooltips ]]--
+
+local cacheAge
+local tipCache = setmetatable({}, {__index = function(t, k) local v = {} t[k] = v return v end})
+local timesRan = 0
+
+local function checkTipCache(search, slotInfo, find)
+	local timestamp = GetTime()
+	if cacheAge and (timestamp - cacheAge) > 15 then
+		wipe(tipCache)
+		cacheAge = nil
+	end
+
+	local id = C_Container.GetContainerItemID(slotInfo.bagId, slotInfo.slotId)
+	if not id then
+		return
+	end
+
+	local cached = tipCache[search][id]
+	if cached ~= nil then
+		return cached
+	end
+
+	local matches = false
+	local tooltipData = C_TooltipInfo.GetBagItem(slotInfo.bagId, slotInfo.slotId)
+	for k, line in ipairs(tooltipData.lines) do
+		TooltipUtil.SurfaceArgs(line)
+		if find then
+			if Search:Find(search, line.leftText) or Search:Find(search, line.rightText) then
+				matches = true
+				break
+			end
+		else
+			if search == line.leftText or search == line.rightText then
+				matches = true
+				break
+			end
+		end
+	end
+
+	if not cacheAge then
+		cacheAge = timestamp
+	end
+	tipCache[search][id] = matches
+	return matches
+end
 
 Lib.Filters.tip = {
 	tags = {'tt', 'tip', 'tooltip'},
@@ -277,16 +307,7 @@ Lib.Filters.tip = {
 	end,
 
 	match = function(self, slotInfo, _, search)
-		local itemInfo = C_Container.GetContainerItemInfo(slotInfo.bagId, slotInfo.slotId)
-		if itemInfo and itemInfo.hyperlink:find('item:') then
-			local tooltipData = C_TooltipInfo.GetBagItem(slotInfo.bagId, slotInfo.slotId)
-			for k, line in ipairs(tooltipData.lines) do
-				TooltipUtil.SurfaceArgs(line)
-				if Search:Find(search, line.leftText) then
-					return true
-				end
-			end
-		end
+		return checkTipCache(search, slotInfo, true)
 	end
 }
 
@@ -302,41 +323,21 @@ Lib.Filters.tipPhrases = {
 	end,
 
 	match = function(self, slotInfo, _, search)
-		local id = C_Container.GetContainerItemID(slotInfo.bagId, slotInfo.slotId)
-		if not id then
-			return
-		end
-
-		local cached = self.cache[search][id]
-		if cached ~= nil then
-			return cached
-		end
-
-		local tooltipData = C_TooltipInfo.GetBagItem(id)
-		local matches = false
-		for k, line in ipairs(tooltipData.lines) do
-			TooltipUtil.SurfaceArgs(line)
-			if search == line.leftText then
-				matches = true
-				break
-			end
-		end
-
-		self.cache[search][id] = matches
-		return matches
+		return checkTipCache(search, slotInfo)
 	end,
 
 	cache = setmetatable({}, {__index = function(t, k) local v = {} t[k] = v return v end}),
 	keywords = {
-		[ITEM_SOULBOUND:lower()] = ITEM_BIND_ON_PICKUP,
+		[ITEM_BIND_ON_PICKUP:lower()] = ITEM_BIND_ON_PICKUP,
+		[ITEM_SOULBOUND:lower()] = ITEM_SOULBOUND,
 		[QUESTS_LABEL:lower()] = ITEM_BIND_QUEST,
 		[GetItemClassInfo(Enum.ItemClass.Questitem):lower()] = ITEM_BIND_QUEST,
 		[PROFESSIONS_USED_IN_COOKING:lower()] = PROFESSIONS_USED_IN_COOKING,
 		[APPEARANCE_LABEL:lower()] = TRANSMOGRIFY_TOOLTIP_APPEARANCE_UNKNOWN,
 		[TOY:lower()] = TOY,
 
-  	['bound'] = ITEM_BIND_ON_PICKUP,
-  	['bop'] = ITEM_BIND_ON_PICKUP,
+		['bound'] = ITEM_SOULBOUND,
+		['bop'] = ITEM_BIND_ON_PICKUP,
 		['boe'] = ITEM_BIND_ON_EQUIP,
 		['bou'] = ITEM_BIND_ON_USE,
 		['boa'] = ITEM_BIND_TO_BNETACCOUNT,
