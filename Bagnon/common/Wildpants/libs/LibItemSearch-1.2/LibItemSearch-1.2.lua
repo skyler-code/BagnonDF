@@ -290,18 +290,20 @@ local function checkTipCache(search, slotInfo, find)
 	if cached ~= nil then
 		return cached
 	end
-
+	search = search:lower()
 	local matches = false
 	local tooltipData = C_TooltipInfo.GetBagItem(slotInfo.bagId, slotInfo.slotId)
 	for k, line in ipairs(tooltipData.lines) do
 		TooltipUtil.SurfaceArgs(line)
+		local leftText = (line.leftText or ""):lower()
+		local rightText = (line.rightText or ""):lower()
 		if find then
-			if Search:Find(search, line.leftText) or Search:Find(search, line.rightText) then
+			if Search:Find(search, leftText) or Search:Find(search, rightText) then
 				matches = true
 				break
 			end
 		else
-			if search == line.leftText or search == line.rightText then
+			if search == leftText or search == rightText then
 				matches = true
 				break
 			end
@@ -332,7 +334,7 @@ Lib.Filters.tipPhrases = {
 	canSearch = function(self, _, search)
 		if #search >= 3 then
 			for key, query in pairs(self.keywords) do
-				if key:find(search) then
+				if key:lower():find(search) then
 					return query
 				end
 			end
@@ -344,14 +346,16 @@ Lib.Filters.tipPhrases = {
 	end,
 
 	keywords = {
-		[ITEM_BIND_ON_PICKUP:lower()] = ITEM_BIND_ON_PICKUP,
-		[ITEM_SOULBOUND:lower()] = ITEM_SOULBOUND,
-		[QUESTS_LABEL:lower()] = ITEM_BIND_QUEST,
-		[GetItemClassInfo(Enum.ItemClass.Questitem):lower()] = ITEM_BIND_QUEST,
-		[PROFESSIONS_USED_IN_COOKING:lower()] = PROFESSIONS_USED_IN_COOKING, -- Crafting Reagent
-		[APPEARANCE_LABEL:lower()] = TRANSMOGRIFY_TOOLTIP_APPEARANCE_UNKNOWN,
-		[TOY:lower()] = TOY,
-		[ITEM_COSMETIC:lower()] = ITEM_COSMETIC,
+		[ITEM_BIND_ON_PICKUP] = ITEM_BIND_ON_PICKUP,
+		[ITEM_SOULBOUND] = ITEM_SOULBOUND,
+		[QUESTS_LABEL] = ITEM_BIND_QUEST,
+		[GetItemClassInfo(Enum.ItemClass.Questitem)] = ITEM_BIND_QUEST,
+		[PROFESSIONS_USED_IN_COOKING] = PROFESSIONS_USED_IN_COOKING, -- Crafting Reagent
+		[APPEARANCE_LABEL] = TRANSMOGRIFY_TOOLTIP_APPEARANCE_UNKNOWN,
+		[TOY] = TOY,
+		[ITEM_COSMETIC] = ITEM_COSMETIC,
+		[ITEM_MILLABLE] = ITEM_MILLABLE,
+		[ITEM_PROSPECTABLE] = ITEM_PROSPECTABLE,
 
 		['bound'] = ITEM_SOULBOUND,
 		['bop'] = ITEM_BIND_ON_PICKUP,
