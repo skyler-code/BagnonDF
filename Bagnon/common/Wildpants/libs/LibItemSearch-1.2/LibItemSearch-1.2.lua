@@ -112,8 +112,8 @@ Lib.Filters.name = {
 	end,
 
 	match = function(self, slotInfo, _, search)
-		local itemID = C_Container.GetContainerItemID(slotInfo.bagId, slotInfo.slotId)
-		return itemID and Search:Find(search, C_Item.GetItemNameByID(itemID))
+		local itemLoc = ItemLocation:CreateFromBagAndSlot(slotInfo.bagId, slotInfo.slotId)
+		return itemLoc:IsValid() and Search:Find(search, C_Item.GetItemName(itemLoc))
 	end
 }
 
