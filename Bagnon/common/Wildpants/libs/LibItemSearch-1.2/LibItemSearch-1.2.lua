@@ -157,9 +157,34 @@ Lib.Filters.requiredlevel = {
 	match = function(self, slotInfo, operator, num)
 		local itemID = C_Container.GetContainerItemID(slotInfo.bagId, slotInfo.slotId)
 		local lvl = itemId and select(5, GetItemInfo(itemID))
-		if lvl then
-			return Search:Compare(operator, lvl, num)
-		end
+		return lvl and Search:Compare(operator, lvl, num)
+	end
+}
+
+Lib.Filters.itemId = {
+	tags = {'itemid', 'id'},
+
+	canSearch = function(self, _, search)
+		return tonumber(search)
+	end,
+
+	match = function(self, slotInfo, _, num)
+		local itemID = C_Container.GetContainerItemID(slotInfo.bagId, slotInfo.slotId)
+		return itemID and itemID == num
+	end
+}
+
+Lib.Filters.anima = {
+	tags = {'anima'},
+
+	canSearch = function(self, _, search)
+		return search
+	end,
+
+	match = function(self, slotInfo, _, search)
+		local id = C_Container.GetContainerItemID(slotInfo.bagId, slotInfo.slotId)
+		print(id)
+		return id and C_Item.IsAnimaItemByID(id)
 	end
 }
 
