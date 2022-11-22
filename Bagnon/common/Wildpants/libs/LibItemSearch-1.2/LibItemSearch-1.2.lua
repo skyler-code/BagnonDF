@@ -44,14 +44,15 @@ end
 
 --[[ Internal API ]]--
 
-function Lib:TooltipLine(slotInfo, line)
-	local tooltipData = C_TooltipInfo.GetBagItem(slotInfo.bagId, slotInfo.slotId)
-	for _, line in ipairs(tooltipData.lines) do
-		TooltipUtil.SurfaceArgs(line)
-	end
-	return tooltipData.lines[line].leftText
-end
-
+local itemLocations = setmetatable({}, {__index = function(t, k)
+	local v = setmetatable({}, {__index = function(r, l)
+		local s = ItemLocation:CreateFromBagAndSlot(k, l)
+		r[l] = s
+		return s
+	end})
+	t[k] = v
+	return v
+end})
 
 if IsAddOnLoaded('ItemRack') then
 	local sameID = ItemRack.SameID
@@ -112,7 +113,7 @@ Lib.Filters.name = {
 	end,
 
 	match = function(self, slotInfo, _, search)
-		local itemLoc = ItemLocation:CreateFromBagAndSlot(slotInfo.bagId, slotInfo.slotId)
+		local itemLoc = itemLocations[slotInfo.bagId][slotInfo.slotId]
 		return itemLoc:IsValid() and Search:Find(search, C_Item.GetItemName(itemLoc))
 	end
 }
@@ -139,7 +140,7 @@ Lib.Filters.level = {
 	end,
 
 	match = function(self, slotInfo, operator, num)
-		local itemLoc = ItemLocation:CreateFromBagAndSlot(slotInfo.bagId, slotInfo.slotId)
+		local itemLoc = itemLocations[slotInfo.bagId][slotInfo.slotId]
 		local lvl = itemLoc:IsValid() and C_Item.GetCurrentItemLevel(itemLoc)
 		return lvl and Search:Compare(operator, lvl, num)
 	end
@@ -227,11 +228,9 @@ Lib.Filters.quality = {
 	end,
 
 	match = function(self, slotInfo, operator, num)
-		local itemInfo = C_Container.GetContainerItemInfo(slotInfo.bagId, slotInfo.slotId)
-		if itemInfo then
-			local quality = itemInfo.hyperlink:find('battlepet') and tonumber(itemInfo.hyperlink:match('%d+:%d+:(%d+)')) or itemInfo.quality
-			return Search:Compare(operator, quality, num)
-		end
+		local itemLoc = itemLocations[slotInfo.bagId][slotInfo.slotId]
+		local quality = itemLoc:IsValid() and C_Item.GetItemQuality(itemLoc)
+		return quality and Search:Compare(operator, quality, num)
 	end,
 }
 
